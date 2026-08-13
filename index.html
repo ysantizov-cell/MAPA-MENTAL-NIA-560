@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapa Mental — NIA 560 Hechos Posteriores al Cierre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#2E2A26;
+    --board:#1B1712;
+    --paper:#FBF7EE;
+ 
+    --purple:#B39DDB;   --purple-line:#7E57C2;
+    --blue:#8FC1E3;     --blue-line:#2E6F95;
+    --green:#A8D5A0;    --green-line:#4C8C4A;
+    --yellow:#F5D76E;   --yellow-line:#C9A227;
+    --orange:#F3A76B;   --orange-line:#D97A2E;
+    --pink:#F1A7A7;     --pink-line:#C1524F;
+  }
+ 
+  *{ box-sizing:border-box; }
+ 
+  @keyframes pageIn{ from{ opacity:0; transform:rotate(-2deg) translateY(20px); } to{ opacity:1; transform:rotate(-0.7deg) translateY(0); } }
+  @keyframes fadeIn{ from{ opacity:0; } to{ opacity:1; } }
+  @keyframes fadeUp{ from{ opacity:0; transform:translateY(12px) scale(.97); } to{ opacity:1; transform:translateY(0) scale(1); } }
+  @keyframes popScale{ from{ opacity:0; transform:scale(.7); } to{ opacity:1; transform:scale(1); } }
+  @keyframes stampIn{ 0%{ opacity:0; transform:scale(2) rotate(-16deg); } 60%{ opacity:1; transform:scale(.85) rotate(-12deg); } 100%{ opacity:1; transform:scale(1) rotate(-12deg); } }
+  @keyframes wobble{ 0%,100%{ transform:rotate(0deg) scale(1.03); } 50%{ transform:rotate(-1.3deg) scale(1.045); } }
+  @keyframes iconWiggle{ 0%,100%{ transform:rotate(0deg) scale(1); } 25%{ transform:rotate(-10deg) scale(1.08); } 75%{ transform:rotate(10deg) scale(1.08); } }
+  @keyframes cloudBreathe{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.025); } }
+  @keyframes bandBreathe{ 0%,100%{ opacity:.92; } 50%{ opacity:1; } }
+  @keyframes floaty{ 0%,100%{ transform:translateY(0) translateX(0); } 50%{ transform:translateY(-16px) translateX(6px); } }
+  @keyframes badgePulse{ 0%,100%{ transform:rotate(3deg) scale(1); } 50%{ transform:rotate(3deg) scale(1.05); } }
+  @keyframes checkPop{ 0%{ transform:scale(.6) rotate(-8deg); } 60%{ transform:scale(1.25) rotate(-8deg); } 100%{ transform:scale(1.12) rotate(-8deg); } }
+  @media (prefers-reduced-motion:reduce){ *{ animation-duration:.001s !important; animation-iteration-count:1 !important; } }
+ 
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(255,255,255,.05), transparent 40%),
+      var(--board);
+    font-family:'Patrick Hand', cursive;
+    color:var(--ink);
+    padding:36px 16px 60px;
+    display:flex;
+    justify-content:center;
+    position:relative;
+    overflow-x:hidden;
+  }
+ 
+  .particle-field{ position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+  .particle{ position:absolute; width:5px; height:5px; border-radius:50%; opacity:.35; animation:floaty 9s ease-in-out infinite; }
+  @media (prefers-reduced-motion:reduce){ .particle{ animation:none; } }
+ 
+  .wrap{ max-width:1200px; width:100%; }
+ 
+  .page{
+    position:relative;
+    width:1080px;
+    max-width:100%;
+    margin:0 auto;
+    background:var(--paper);
+    padding:26px 24px 40px;
+    border-radius:6px;
+    box-shadow:0 30px 70px rgba(0,0,0,.5), 0 4px 0 rgba(0,0,0,.15);
+    transform:rotate(-0.7deg);
+    animation:pageIn .7s cubic-bezier(.2,.7,.3,1) both;
+  }
+ 
+  .spiral{
+    position:absolute; left:-14px; top:40px; bottom:40px; width:28px;
+    display:flex; flex-direction:column; justify-content:space-between;
+  }
+  .spiral i{
+    display:block; width:22px; height:22px; border-radius:50%;
+    border:3px solid rgba(46,42,38,.35);
+    background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.5), rgba(0,0,0,.08));
+  }
+ 
+  header{ text-align:center; margin:6px 0 6px; position:relative; z-index:2; }
+  .eyebrow{
+    font-family:'Patrick Hand', cursive; font-size:13px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--blue-line); margin:0 0 4px;
+  }
+  h1{
+    font-family:'Caveat', cursive; font-weight:700; font-size:42px; margin:0 0 4px; color:var(--ink);
+  }
+  header p.sub{
+    font-family:'Patrick Hand', cursive; font-size:14px; color:var(--ink); opacity:.75;
+    margin:0 auto; max-width:640px; line-height:1.4;
+  }
+ 
+  .progress-badge{
+    position:absolute; right:20px; top:16px;
+    background:var(--yellow); padding:8px 14px 10px; transform:rotate(3deg);
+    box-shadow:0 6px 14px rgba(0,0,0,.2);
+    font-family:'Caveat', cursive; font-weight:700; font-size:17px; color:var(--ink);
+    animation:fadeUp .6s cubic-bezier(.2,.7,.3,1) both; animation-delay:.15s; z-index:3;
+    transition:background .4s ease;
+  }
+  .progress-badge.complete{ animation:fadeUp .6s cubic-bezier(.2,.7,.3,1) both, badgePulse 1.2s ease-in-out 2; }
+ 
+  .canvas-wrap{ overflow-x:auto; padding-bottom:4px; }
+  .canvas{ position:relative; width:1000px; height:1260px; margin:0 auto; }
+  .canvas > svg{ position:absolute; left:0; top:0; }
+ 
+  .band-fill{ fill:none; stroke-linecap:round; stroke-linejoin:round; animation:bandBreathe 5s ease-in-out infinite; transform-box:fill-box; transform-origin:center; }
+  .band-outline{ fill:none; stroke-linecap:round; stroke-linejoin:round; opacity:.9; }
+  @media (prefers-reduced-motion:reduce){ .band-fill{ animation:none; } }
+ 
+  .cloud{ fill:var(--paper); stroke:var(--ink); stroke-width:2.5; opacity:.95; transform-box:fill-box; transform-origin:center; animation:cloudBreathe 4.5s ease-in-out infinite; }
+  @media (prefers-reduced-motion:reduce){ .cloud{ animation:none; } }
+  .cloud-doodle{ fill:none; stroke:var(--ink); stroke-width:1.6; opacity:.55; stroke-linecap:round; }
+ 
+  .zone{
+    position:absolute;
+    cursor:pointer;
+    animation:fadeUp .7s cubic-bezier(.2,.7,.3,1) both;
+    transition:transform .25s ease;
+  }
+  .zone:hover, .zone.tapped{ animation:wobble .55s ease-in-out; }
+  .zone:hover .doodle, .zone.tapped .doodle{ animation:iconWiggle .55s ease-in-out; }
+  .zone:active{ transform:scale(.98); }
+  .z1{ animation-delay:.3s; } .z2{ animation-delay:.42s; } .z3{ animation-delay:.54s; }
+  .z4{ animation-delay:.66s; } .z5{ animation-delay:.78s; } .z6{ animation-delay:.9s; }
+ 
+  .zone .label{
+    font-family:'Caveat', cursive;
+    font-weight:700;
+    font-size:26px;
+    margin:0 0 4px;
+    cursor:pointer;
+  }
+  .zone .label:hover{ text-decoration:underline; text-decoration-style:dotted; }
+  .zone .see-more{
+    display:block;
+    font-family:'Caveat', cursive; font-weight:700; font-size:16px;
+    opacity:.85; margin:-2px 0 6px;
+  }
+  .zone .ref{
+    font-family:'Patrick Hand', cursive; font-size:11px; opacity:.6; display:block; margin-top:4px;
+  }
+  .zone p{
+    font-family:'Patrick Hand', cursive; font-size:13.5px; line-height:1.38; margin:0;
+  }
+ 
+  .z-purple{ color:#3E2E63; } .z-purple .label, .z-purple .see-more{ color:var(--purple-line); }
+  .z-blue{ color:#123A52; }   .z-blue .label, .z-blue .see-more{ color:var(--blue-line); }
+  .z-green{ color:#20421F; } .z-green .label, .z-green .see-more{ color:var(--green-line); }
+  .z-yellow{ color:#4A3B0A; } .z-yellow .label, .z-yellow .see-more{ color:var(--yellow-line); }
+  .z-orange{ color:#5A2F0E; } .z-orange .label, .z-orange .see-more{ color:var(--orange-line); }
+  .z-pink{ color:#5A1F1F; }   .z-pink .label, .z-pink .see-more{ color:var(--pink-line); }
+ 
+  .z1{ left:60px; top:70px; width:250px; }
+  .z2{ left:660px; top:60px; width:260px; }
+  .z3{ left:740px; top:470px; width:230px; text-align:right; }
+  .z4{ left:660px; top:900px; width:260px; }
+  .z5{ left:230px; top:1020px; width:260px; text-align:left; }
+  .z6{ left:40px; top:560px; width:250px; }
+ 
+  .doodle{ display:block; margin-bottom:4px; transition:transform .3s ease; }
+ 
+  .check-badge{
+    position:absolute; width:26px; height:26px; border-radius:50%;
+    border:2.5px solid var(--ink); background:rgba(255,255,255,.8);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Caveat', cursive; font-weight:700; font-size:16px; color:transparent;
+    cursor:pointer; transition:all .2s ease; z-index:4;
+  }
+  .check-badge:hover{ transform:scale(1.2); }
+  .zone.done .check-badge{ color:var(--ink); border-color:var(--ink); background:#fff; animation:checkPop .4s cubic-bezier(.3,1.4,.4,1) both; }
+  .zone.done .check-badge::after{ content:"✓"; }
+  .zone.done .label{ text-decoration:line-through; }
+  .zone.done p{ opacity:.5; }
+ 
+  footer{
+    max-width:1000px; margin:8px auto 0; text-align:center;
+    font-family:'Caveat', cursive; font-size:18px; color:var(--ink); opacity:.7;
+  }
+ 
+  /* ---------- modal ---------- */
+  .modal-backdrop{
+    display:none; position:fixed; inset:0; background:rgba(20,16,12,.6); z-index:100;
+    align-items:center; justify-content:center; padding:24px;
+  }
+  .modal-backdrop.open{ display:flex; animation:fadeIn .25s ease both; }
+  .modal-box{
+    position:relative; width:640px; max-width:100%; max-height:82vh; overflow-y:auto;
+    background:var(--paper); padding:32px 30px 28px; border-radius:8px;
+    box-shadow:0 30px 60px rgba(0,0,0,.5); transform:rotate(-0.4deg);
+    animation:popScale .3s cubic-bezier(.2,.7,.3,1) both;
+  }
+  .modal-close{
+    position:absolute; top:14px; right:16px; width:34px; height:34px; border-radius:50%;
+    border:2.5px solid var(--ink); background:var(--paper); font-family:'Caveat', cursive; font-weight:700;
+    font-size:20px; line-height:1; color:var(--ink); cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .2s ease, background .2s ease;
+  }
+  .modal-close:hover{ transform:rotate(90deg) scale(1.08); background:var(--pink); }
+  .modal-box h2{ font-family:'Caveat', cursive; font-weight:700; font-size:34px; margin:6px 40px 4px 0; color:var(--ink); }
+  .modal-box .modal-ref{ font-family:'Patrick Hand', cursive; font-size:12.5px; opacity:.6; margin-bottom:14px; display:block; }
+  .modal-box .modal-body{ font-family:'Patrick Hand', cursive; font-size:16px; line-height:1.55; color:var(--ink); }
+  .modal-box .modal-body p{ margin:0 0 12px; }
+  .modal-box .modal-body b{ font-weight:700; color:var(--pink-line); }
+</style>
+</head>
+<body>
+<div class="particle-field" id="particleField"></div>
+<div class="wrap">
+  <div class="page">
+    <div class="spiral">
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+    </div>
+ 
+    <div class="progress-badge" id="progressBadge">Progreso: <span id="progressCount">0</span>/6 ✎</div>
+ 
+    <header>
+      <p class="eyebrow">Norma Internacional de Auditoría</p>
+      <h1>NIA 560 · Hechos Posteriores al Cierre</h1>
+      <p class="sub">Toca cada zona de color para leer más, y el círculo ✓ para marcarla como repasada.</p>
+    </header>
+ 
+    <div class="canvas-wrap">
+    <div class="canvas">
+      <svg width="1000" height="1260" viewBox="0 0 1000 1260">
+        <!-- PURPLE -->
+        <path class="band-outline" d="M500,650 C420,520 300,420 220,300 C170,220 150,160 140,100" stroke="#7E57C2" stroke-width="222"/>
+        <path class="band-fill" d="M500,650 C420,520 300,420 220,300 C170,220 150,160 140,100" stroke="#B39DDB" stroke-width="210"/>
+ 
+        <!-- BLUE -->
+        <path class="band-outline" d="M520,630 C620,500 730,400 800,280 C830,220 845,160 855,100" stroke="#2E6F95" stroke-width="222"/>
+        <path class="band-fill" d="M520,630 C620,500 730,400 800,280 C830,220 845,160 855,100" stroke="#8FC1E3" stroke-width="210"/>
+ 
+        <!-- GREEN -->
+        <path class="band-outline" d="M560,660 C700,650 820,600 900,520 C930,490 945,470 960,450" stroke="#4C8C4A" stroke-width="210"/>
+        <path class="band-fill" d="M560,660 C700,650 820,600 900,520 C930,490 945,470 960,450" stroke="#A8D5A0" stroke-width="198"/>
+ 
+        <!-- YELLOW -->
+        <path class="band-outline" d="M550,700 C680,760 790,830 850,900 C865,920 875,940 885,965" stroke="#C9A227" stroke-width="220"/>
+        <path class="band-fill" d="M550,700 C680,760 790,830 850,900 C865,920 875,940 885,965" stroke="#F5D76E" stroke-width="208"/>
+ 
+        <!-- ORANGE -->
+        <path class="band-outline" d="M500,700 C460,850 420,980 400,1100 C392,1140 388,1170 385,1200" stroke="#D97A2E" stroke-width="220"/>
+        <path class="band-fill" d="M500,700 C460,850 420,980 400,1100 C392,1140 388,1170 385,1200" stroke="#F3A76B" stroke-width="208"/>
+ 
+        <!-- PINK -->
+        <path class="band-outline" d="M460,660 C330,650 220,640 140,700 C105,730 85,760 70,800" stroke="#C1524F" stroke-width="222"/>
+        <path class="band-fill" d="M460,660 C330,650 220,640 140,700 C105,730 85,760 70,800" stroke="#F1A7A7" stroke-width="210"/>
+ 
+        <!-- CENTER CLOUD -->
+        <path class="cloud" d="M430,560 C400,530 400,480 435,455 C420,410 450,370 500,375 C520,335 580,335 605,375 C650,365 690,400 680,445 C715,460 720,510 685,535 C695,575 660,610 615,600 C595,635 535,640 505,605 C460,615 425,595 430,560 Z"/>
+        <path class="cloud-doodle" d="M480,470 C495,455 520,455 530,475 C545,465 565,475 560,495 C575,505 570,525 550,525"/>
+        <path class="cloud-doodle" d="M540,520 C555,510 575,515 578,530"/>
+        <text x="552" y="500" font-family="Caveat" font-weight="700" font-size="22" fill="#2E2A26" text-anchor="middle">NIA 560</text>
+      </svg>
+ 
+      <!-- Z1 PURPLE — Alcance y Objetivos -->
+      <div class="zone z-purple z1" data-id="b1">
+        <svg class="doodle" width="34" height="34" viewBox="0 0 40 40" fill="none" stroke="#3E2E63" stroke-width="2.3"><circle cx="17" cy="17" r="12"/><line x1="26" y1="26" x2="36" y2="36" stroke-linecap="round"/></svg>
+        <h3 class="label">Alcance y Objetivos</h3>
+        <span class="check-badge" style="position:absolute; top:-10px; right:-42px;" title="Marcar como repasado"></span>
+        <span class="see-more">ver más 🔍</span>
+        <p>Trata la responsabilidad del auditor sobre hechos posteriores al cierre (no la "otra información": eso es la NIA 720). Objetivo: reflejar bien los hechos previos al informe, y reaccionar bien ante los que llegan después.</p>
+        <span class="ref">Apart. 1, 3–4</span>
+      </div>
+ 
+      <!-- Z2 BLUE — Las cuatro fechas -->
+      <div class="zone z-blue z2" data-id="b2">
+        <svg class="doodle" width="34" height="34" viewBox="0 0 40 40" fill="none" stroke="#123A52" stroke-width="2.3"><rect x="5" y="8" width="30" height="26" rx="2"/><line x1="5" y1="16" x2="35" y2="16"/><line x1="12" y1="4" x2="12" y2="11"/><line x1="28" y1="4" x2="28" y2="11"/><circle cx="14" cy="24" r="2" fill="#123A52" stroke="none"/><circle cx="22" cy="24" r="2" fill="#123A52" stroke="none"/><circle cx="30" cy="24" r="2" fill="#123A52" stroke="none"/><circle cx="14" cy="30" r="2" fill="#123A52" stroke="none"/></svg>
+        <h3 class="label">Las Cuatro Fechas Clave</h3>
+        <span class="check-badge" style="position:absolute; top:-10px; right:-42px;" title="Marcar como repasado"></span>
+        <span class="see-more">ver más 🔍</span>
+        <p>Fecha de los EEFF → fecha de aprobación → fecha del informe de auditoría → fecha de publicación. Los "hechos posteriores al cierre" son todo lo ocurrido entre la primera y la segunda, más lo que el auditor sepa después.</p>
+        <span class="ref">Apart. 5</span>
+      </div>
+ 
+      <!-- Z3 GREEN — Antes del informe -->
+      <div class="zone z-green z3" data-id="b3">
+        <svg class="doodle" width="34" height="34" viewBox="0 0 40 40" fill="none" stroke="#4C8C4A" stroke-width="2.3" style="margin-left:auto;"><circle cx="20" cy="20" r="15"/><path d="M12 20l5 6 11-13" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <h3 class="label">Antes del Informe</h3>
+        <span class="check-badge" style="position:absolute; top:-10px; left:-42px;" title="Marcar como repasado"></span>
+        <span class="see-more">ver más 🔍</span>
+        <p>Aquí el auditor SÍ busca activamente: indaga a la dirección, lee actas y estados intermedios. Si algo requiere ajuste, lo verifica y pide manifestaciones escritas de que todo quedó reflejado.</p>
+        <span class="ref">Apart. 6–9</span>
+      </div>
+ 
+      <!-- Z4 YELLOW — Después del informe, antes de publicar -->
+      <div class="zone z-yellow z4" data-id="b4">
+        <svg class="doodle" width="34" height="34" viewBox="0 0 40 40" fill="none" stroke="#C9A227" stroke-width="2.3"><path d="M6 30 L6 22 L24 4 L32 12 L14 30 Z" stroke-linejoin="round"/><line x1="20" y1="8" x2="28" y2="16" stroke-linecap="round"/></svg>
+        <h3 class="label">Antes de Publicar</h3>
+        <span class="check-badge" style="position:absolute; top:-10px; right:-42px;" title="Marcar como repasado"></span>
+        <span class="see-more">ver más 🔍</span>
+        <p>El auditor ya no busca, pero si algo llega a su conocimiento y habría cambiado su informe, actúa: discute con la dirección y, si modifican los EEFF, emite un nuevo informe (o usa la "doble fecha" si el cambio es puntual).</p>
+        <span class="ref">Apart. 10–13</span>
+      </div>
+ 
+      <!-- Z5 ORANGE — Después de publicados -->
+      <div class="zone z-orange z5" data-id="b5">
+        <svg class="doodle" width="34" height="34" viewBox="0 0 40 40" fill="none" stroke="#D97A2E" stroke-width="2.3"><path d="M6 14 C6 8 14 4 20 8 C26 4 34 8 34 14 C34 22 20 32 20 32 C20 32 6 22 6 14 Z" stroke-linejoin="round"/><line x1="20" y1="18" x2="20" y2="18" stroke-linecap="round"/></svg>
+        <h3 class="label">Después de Publicados</h3>
+        <span class="check-badge" style="position:absolute; top:-10px; right:-42px;" title="Marcar como repasado"></span>
+        <span class="see-more">ver más 🔍</span>
+        <p>El escenario más delicado: si algo llega a conocimiento del auditor tras la publicación, y hay modificación, se avisa a quien recibió los EEFF anteriores y se explica el cambio en el nuevo informe.</p>
+        <span class="ref">Apart. 14–17</span>
+      </div>
+ 
+      <!-- Z6 PINK — Recursos prácticos -->
+      <div class="zone z-pink z6" data-id="b6">
+        <svg class="doodle" width="34" height="34" viewBox="0 0 40 40" fill="none" stroke="#C1524F" stroke-width="2.3"><path d="M10 4 h16 l6 6 v26 h-22 z" stroke-linejoin="round"/><path d="M26 4 v6 h6" stroke-linejoin="round"/><line x1="14" y1="20" x2="26" y2="20"/><line x1="14" y1="26" x2="26" y2="26"/></svg>
+        <h3 class="label">Recursos Prácticos</h3>
+        <span class="check-badge" style="position:absolute; top:-10px; right:-42px;" title="Marcar como repasado"></span>
+        <span class="see-more">ver más 🔍</span>
+        <p>Manifestaciones escritas, la "doble fecha" en el informe, y cuándo pedir asesoramiento jurídico si la dirección no colabora para evitar que se confíe en un informe ya superado.</p>
+        <span class="ref">A9, A13, A16–17, A20</span>
+      </div>
+    </div>
+    </div>
+ 
+    <footer>hecho a mano, con cariño de auditor ✎</footer>
+  </div>
+</div>
+ 
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal-box">
+    <button class="modal-close" id="modalClose" aria-label="Cerrar">✕</button>
+    <h2 id="modalTitle"></h2>
+    <span class="modal-ref" id="modalRef"></span>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+ 
+<script>
+  const details = {
+    b1: {
+      title: 'Alcance y Objetivos',
+      ref: 'Apartados 1, 3–4',
+      html: `<p>Esta NIA trata la responsabilidad del auditor respecto a los hechos posteriores al cierre en una auditoría de estados financieros. No cubre las responsabilidades sobre "otra información" obtenida después de la fecha del informe —eso es materia de la NIA 720 (Revisada)— aunque esa otra información a veces puede sacar a la luz un hecho posterior al cierre que sí entra en el alcance de esta norma.</p>
+        <p>Los objetivos del auditor son dos: <b>(a)</b> obtener evidencia de auditoría suficiente y adecuada de que los hechos ocurridos entre la fecha de los estados financieros y la fecha del informe, que requieran ajuste o revelación, se han reflejado adecuadamente; y <b>(b)</b> reaccionar de forma apropiada ante los hechos que lleguen a su conocimiento después de la fecha del informe y que, de haber sido conocidos antes, le habrían llevado a rectificarlo.</p>
+        <p>Aplica a las auditorías de estados financieros correspondientes a periodos iniciados a partir del 15 de diciembre de 2009.</p>`
+    },
+    b2: {
+      title: 'Las Cuatro Fechas Clave',
+      ref: 'Apartado 5',
+      html: `<p>Toda la norma gira en torno a cuatro fechas, y entender su orden es la clave para aplicarla bien:</p>
+        <p><b>Fecha de los estados financieros:</b> el cierre del último periodo cubierto.</p>
+        <p><b>Fecha de aprobación:</b> cuando se preparó todo (incluidas las notas) y las personas con autoridad reconocida asumieron su responsabilidad sobre ellos.</p>
+        <p><b>Fecha del informe de auditoría:</b> la que pone el auditor — nunca puede ser anterior a la fecha de aprobación.</p>
+        <p><b>Fecha de publicación:</b> cuando los estados financieros auditados y el informe se ponen a disposición de terceros.</p>
+        <p>Y los "hechos posteriores al cierre" son, por definición, los que ocurren entre la fecha de los EEFF y la del informe, más los que el auditor llega a conocer después de la fecha del informe.</p>`
+    },
+    b3: {
+      title: 'Antes del Informe de Auditoría',
+      ref: 'Apartados 6–9',
+      html: `<p>Este es el único periodo en el que el auditor tiene el deber activo de <b>buscar</b>: debe aplicar procedimientos diseñados para identificar todos los hechos, ocurridos entre la fecha de los estados financieros y la del informe, que requieran ajuste o revelación.</p>
+        <p>Los procedimientos mínimos incluyen: conocer los procedimientos que la propia dirección tiene para detectar estos hechos; indagar ante la dirección y los responsables del gobierno; leer las actas de reuniones posteriores a la fecha de los EEFF; y leer los últimos estados financieros intermedios disponibles.</p>
+        <p>Si estos procedimientos revelan hechos que requieren ajuste, el auditor comprueba que se reflejen correctamente. Al final, se solicitan <b>manifestaciones escritas</b> a la dirección de que todos los hechos que debían ajustarse o revelarse, lo fueron (NIA 580).</p>`
+    },
+    b4: {
+      title: 'Después del Informe, Antes de Publicar',
+      ref: 'Apartados 10–13',
+      html: `<p>Aquí cambia la lógica: el auditor ya <b>no</b> tiene obligación de seguir buscando. Pero si, por cualquier vía, llega a su conocimiento un hecho que —de haberlo sabido antes— le habría llevado a rectificar el informe, debe actuar: discutirlo con la dirección, determinar si los estados financieros necesitan modificarse, e indagar cómo piensa tratarlo la dirección.</p>
+        <p>Si la dirección modifica los estados financieros, por regla general el auditor amplía sus procedimientos hasta la fecha del nuevo informe y emite un informe nuevo.</p>
+        <p>Existe una salida más ágil cuando la modificación se limita a un solo hecho: la <b>"doble fecha"</b> — el auditor mantiene la fecha original del informe, pero añade una fecha adicional que cubre únicamente esa modificación puntual.</p>
+        <p>Si la dirección se niega a modificar cuando el auditor cree que debería: si el informe aún no se entregó, se expresa una opinión modificada; si ya se entregó, se notifica que no debe divulgarse hasta corregirlo.</p>`
+    },
+    b5: {
+      title: 'Después de Publicados los Estados Financieros',
+      ref: 'Apartados 14–17',
+      html: `<p>El escenario más delicado: los estados financieros ya están en manos de terceros, y aun así llega a conocimiento del auditor un hecho que habría cambiado su informe.</p>
+        <p>El procedimiento es similar al periodo anterior —discutir con la dirección, evaluar si hace falta modificar, indagar el plan de la dirección— pero con un paso extra: si se modifican los estados financieros, el auditor también revisa que la dirección informe del cambio a cualquiera que haya recibido la versión anterior.</p>
+        <p>El nuevo informe (o el rectificado) debe incluir un párrafo de énfasis o de otras cuestiones que explique por qué se modificaron los estados financieros ya publicados.</p>
+        <p>Si la dirección no actúa como debería, el auditor debe tomar las medidas a su alcance para evitar que se siga confiando en el informe original — en la práctica, suele implicar buscar asesoramiento jurídico.</p>`
+    },
+    b6: {
+      title: 'Recursos Prácticos del Auditor',
+      ref: 'A9, A13, A16–A17, A20',
+      html: `<p>Algunas herramientas y salidas que aparecen una y otra vez a lo largo de la norma:</p>
+        <p><b>Manifestaciones escritas</b> (Apartado 9, NIA 580): antes de cerrar, el auditor pide por escrito a la dirección que confirme que todos los hechos que debían ajustarse o revelarse, lo fueron.</p>
+        <p><b>La "doble fecha"</b> (A13): una forma de fechar el informe cuando la modificación se limita a un hecho puntual — ejemplo: "(fecha del informe original), salvo en lo que respecta a la Nota Y, que es a día (fecha de finalización de los procedimientos limitados a esa nota)".</p>
+        <p><b>Asesoramiento jurídico</b> (A16, A17, A20): cuando la dirección no colabora en evitar que se confíe en un informe ya superado, el auditor puede necesitar apoyo legal, porque sus opciones dependen de sus derechos y obligaciones en cada jurisdicción.</p>
+        <p><b>Sector público:</b> la "fecha de publicación" suele coincidir con la presentación ante el Parlamento u otro órgano equivalente.</p>`
+    }
+  };
+ 
+  const modalBackdrop = document.getElementById('modalBackdrop');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalRef = document.getElementById('modalRef');
+  const modalBody = document.getElementById('modalBody');
+  const modalClose = document.getElementById('modalClose');
+ 
+  function openModal(id){
+    const d = details[id];
+    if (!d) return;
+    modalTitle.textContent = d.title;
+    modalRef.textContent = d.ref;
+    modalBody.innerHTML = d.html;
+    modalBackdrop.classList.add('open');
+  }
+  function closeModal(){ modalBackdrop.classList.remove('open'); }
+ 
+  document.querySelectorAll('.zone .label').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openModal(el.closest('.zone').getAttribute('data-id'));
+    });
+  });
+ 
+  modalClose.addEventListener('click', closeModal);
+  modalBackdrop.addEventListener('click', (e) => { if (e.target === modalBackdrop) closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+ 
+  const zones = document.querySelectorAll('.zone');
+  const progressEl = document.getElementById('progressCount');
+  const total = zones.length;
+ 
+  function updateProgress(){
+    const done = document.querySelectorAll('.zone.done').length;
+    progressEl.textContent = done;
+    const badge = document.getElementById('progressBadge');
+    if (done === total) {
+      badge.style.background = 'var(--green)';
+      badge.classList.add('complete');
+    } else {
+      badge.style.background = 'var(--yellow)';
+      badge.classList.remove('complete');
+    }
+  }
+ 
+  // partículas flotantes decorativas
+  const reduceMotion = typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const field = document.getElementById('particleField');
+  if (field && !reduceMotion) {
+    const colors = ['#B39DDB', '#8FC1E3', '#A8D5A0', '#F5D76E', '#F3A76B', '#F1A7A7'];
+    for (let i = 0; i < 22; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.left = Math.random() * 100 + 'vw';
+      p.style.top = Math.random() * 100 + 'vh';
+      p.style.background = colors[i % colors.length];
+      p.style.animationDuration = (7 + Math.random() * 8) + 's';
+      p.style.animationDelay = (Math.random() * 5) + 's';
+      field.appendChild(p);
+    }
+  }
+ 
+  zones.forEach(z => {
+    const id = z.getAttribute('data-id');
+    z.addEventListener('click', () => {
+      z.classList.remove('tapped');
+      void z.offsetWidth; // reinicia la animación
+      z.classList.add('tapped');
+      openModal(id);
+    });
+    const checkbox = z.querySelector('.check-badge');
+    if (checkbox) {
+      checkbox.addEventListener('click', (e) => {
+        e.stopPropagation();
+        z.classList.toggle('done');
+        updateProgress();
+      });
+    }
+  });
+</script>
+ 
+</body>
+</html>
